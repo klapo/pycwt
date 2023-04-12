@@ -128,7 +128,7 @@ def coi_scale_avg(coi, scales):
     return min_index, max_index
 
 
-class CWT:
+class wvlt:
     def __init__(self):
         self._signal_norm = None
         self._dx = None
@@ -279,17 +279,18 @@ class CWT:
         if norm_kwargs is None:
             self._norm_kwargs = {"detrend": True, "standardize": True}
         else:
+            self._norm_kwargs = norm_kwargs
             self._norm_kwargs.setdefault("standardize", True)
             self._norm_kwargs.setdefault("detrend", True)
 
         # If we do not normalize by the std, we need to find the variance
-        if not self._norm_kwargs["standardize"] and self._variance is None:
+        if not self._norm_kwargs["standardize"] and variance is None:
             self._variance = np.std(signal) ** 2
 
         # For strongly non-stationary vectors, estimating the (white noise) variance
         # from the data itself is poorly defined. This option allows the user to pass a
         # pre-determined variance.
-        elif self._variance is not None:
+        elif variance is not None:
             self._variance = variance
 
         # If the data were standardized, the variance should be 1 by definition (
@@ -332,14 +333,14 @@ class CWT:
             self._signal_norm, self._dx, dj, s0, J, self._mother
         )
 
-        # Calculate the normalized wavelet and Fourier power spectra,
-        # as well as the Fourier equivalent periods for each wavelet scale.
-        # Note that this power is not normalized as in TC98 equation 8, the factor
-        # of dt^(1/2) is missing.
+        # Calculate the normalized wavelet and Fourier power spectra, as well as the
+        # Fourier equivalent periods for each wavelet scale. Note that this power is
+        # not normalized as in TC98 equation 8, the factor of dt^(1/2) is missing.
         self._power = np.abs(wave) ** 2
         # fft_power = np.abs(fft) ** 2
         self._period = 1 / freqs
         self._scales = scales
+        self._coi = coi
 
         # Do the significance testing for both the local and global spectra
         if self._significance_test:
@@ -373,8 +374,8 @@ class CWT:
 
         # Calculate the global wavelet spectrum
         self._global_power = self._power.mean(axis=1)
-        if self._glbl_power_var_scaling:
-            self._global_power = self._global_power / self._variance
+        # if self._glbl_power_var_scaling:
+        #     self._global_power = self._global_power / self._variance
 
         # Do the significance testing for the global spectra
         if self._significance_test:
@@ -520,9 +521,9 @@ class CWT:
             coi : numpy array  of length n, cone of influence
             angle : phase angle in degrees
             w1 : same type as s1, size PxN
-                CWT for s1
+                wvlt for s1
             w2 : same type as s1, size PxN
-                CWT for s2
+                wvlt for s2
         """
         assert (
             mother.name == "Morlet"
@@ -542,7 +543,7 @@ class CWT:
         s1_norm = standardize_data(s1, **self._norm_kwargs)
         s2_norm = standardize_data(s2, **self._norm_kwargs)
 
-        # Calculates the CWT of the time-series making sure the same parameters
+        # Calculates the wvlt of the time-series making sure the same parameters
         # are used in both calculations.
         W1, sj, freq, coi, _, _ = pycwt.cwt(s1_norm, dx, dj, s0, J, mother)
         W2, _, _, _, _, _ = pycwt.cwt(s2_norm, dx, dj, s0, J, mother)

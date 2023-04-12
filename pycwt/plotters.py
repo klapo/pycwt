@@ -122,7 +122,7 @@ def plot_wv_power(
     dx = cwt_fit.dx
     period = cwt_fit.period
     coi = cwt_fit.coi
-    sig95 = cwt_fit.signficance
+    sig95 = cwt_fit.significance
     glbl_signif = cwt_fit.global_significance
     glbl_power = cwt_fit.global_power
     scale_avg = cwt_fit.scale_avg
